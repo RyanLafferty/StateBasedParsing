@@ -17,6 +17,7 @@ typedef struct node
 
 void parseFile(char * fileName);
 node * createNode(char * name, char * data, char type);
+char getType(char buffer[1000], int size);
 
 int main(int argc, char *argv[])
 {
@@ -49,6 +50,8 @@ void parseFile(char * fileName)
 	char type;
 	char ch;
 	char buffer[1000];
+	char * name;
+	char * data;
 	int state;
 	int error;
 	int size;
@@ -57,7 +60,9 @@ void parseFile(char * fileName)
 
 	type = 0;
 	ch = 1;
-	state = -1;
+	name = NULL;
+	data = NULL;
+	state = 0;
 	size = 0;
 	error = 0;
 	i = 0;
@@ -98,48 +103,50 @@ void parseFile(char * fileName)
 		}
 		else if(ch == ' ' && state == 1)
 		{
-			/*add new node*/
+			/*printf("type = %s\n", buffer);*/
 			/*get type*/
+			type = getType(buffer, size);
+			if(type == 0)
+			{
+				printf("Error: Invalid type.\n");
+				return;
+			}
+
 			state = 2;
+			size = 0;
+			for(i = 0; i < 1000; i++)
+			{
+				buffer[i] = 0;
+			}
 		}
 		else if(ch == '=')
 		{
+			/*printf("name = %s\n", buffer);*/
 			/*get name*/
 			state = 3;
+			size = 0;
+			for(i = 0; i < 1000; i++)
+			{
+				buffer[i] = 0;
+			}
 		}
 		else if(ch == ';')
 		{
+			/*printf("data = %s\n", buffer);*/
 			/*get data*/
+			/*add node*/
+			/*free data*/
 			state = 0;
+			size = 0;
+			for(i = 0; i < 1000; i++)
+			{
+				buffer[i] = 0;
+			}
 		}
 		else
 		{
 
 		}
-
-		/*switch (state)
-		{
-			case 0:
-			{
-				break;
-			}
-			case 1:
-			{
-				break;
-			}
-			case 2:
-			{
-				break;
-			}
-			case 3:
-			{
-				break;
-			}
-			default:
-			{
-				break;
-			}
-		}*/
 	}
 
 	printf("\n");
@@ -190,4 +197,45 @@ node * createNode(char * name, char * data, char type)
 	strncpy(n->data, data, (strlen(data)+1));
 
 	return n;
+}
+
+char getType(char buffer[1000], int size)
+{
+	int i;
+
+	i = 0;
+
+	if(buffer == NULL)
+	{
+		printf("Error: No buffer given.\n");
+		return 0;
+	}
+	if(size < 3)
+	{
+		printf("Error: Invalid type.\n");
+		return 0;
+	}
+
+	/*printf("%s\n", buffer);*/
+
+	if(size == 3
+	   && buffer[0] == 'i'
+	   && buffer[1] == 'n'
+	   && buffer[2] == 't')
+	{
+		/*printf("Type = int\n");*/
+		return 1;
+	}
+	if(size == 4
+	   && buffer[0] == 'c'
+	   && buffer[1] == 'h'
+	   && buffer[2] == 'a'
+	   && buffer[3] == 'r')
+	{
+		/*printf("Type = char\n");*/
+		return 2;
+	}
+
+	printf("Error: Invalid type given.\n");
+	return 0;
 }
