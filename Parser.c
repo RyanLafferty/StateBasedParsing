@@ -213,6 +213,11 @@ void parseFile(char * fileName)
 		}
 	}
 
+	if(head == NULL)
+	{
+		return;
+	}
+
 	printf("Displaying data structure contents\n");
 	printf("==================================\n");
 
