@@ -20,6 +20,9 @@ node * createNode(char * name, char * data, char type);
 char getType(char buffer[1000], int size);
 char * getName(char buffer[1000], int size);
 char * getData(char buffer[1000], int size);
+void displayNode(node * n);
+int destroyNode(node * n);
+int destroyDataStructure(node * nav);
 
 int main(int argc, char *argv[])
 {
@@ -59,6 +62,8 @@ void parseFile(char * fileName)
 	int size;
 	int i;
 	FILE * f;
+	node * head;
+	node * nav;
 
 	type = 0;
 	ch = 1;
@@ -69,6 +74,8 @@ void parseFile(char * fileName)
 	error = 0;
 	i = 0;
 	f = NULL;
+	head = NULL;
+	nav = NULL;
 
 	if(fileName == NULL)
 	{
@@ -146,10 +153,47 @@ void parseFile(char * fileName)
 		else if(ch == ';')
 		{
 			/*printf("data = %s\n", buffer);*/
-			/*get data*/
-			/*check for errors*/
-			/*add node*/
-			/*free data*/
+			if(name == NULL)
+			{
+				printf("Error: Invalid name.\n");
+				return;
+			}
+			if(type == 0)
+			{
+				printf("Error: Invalid type.\n");
+				return;
+			}
+
+			data = getData(buffer, size);
+			if(data == NULL)
+			{
+				printf("Error: Invalid data.\n");
+				free(name);
+				return;
+			}
+			/*printf("data = %s\n", data);*/
+
+			if(head == NULL)
+			{
+				head = createNode(name, data, type);
+				if(head == NULL)
+				{
+					printf("Error: Could not create head.\n");
+					return;
+				}
+				nav = head;
+			}
+			else
+			{
+				nav->next = createNode(name, data, type);
+				if(nav->next == NULL)
+				{
+					printf("Error: Could not create node.\n");
+					return;
+				}
+				nav = nav->next;
+			}
+
 			state = 0;
 			size = 0;
 			for(i = 0; i < 1000; i++)
@@ -168,6 +212,21 @@ void parseFile(char * fileName)
 
 		}
 	}
+
+	printf("Displaying data structure contents\n");
+	printf("==================================\n");
+
+	nav = head;
+	while(nav->next != NULL)
+	{
+		displayNode(nav);
+		nav = nav->next;
+	}
+	displayNode(nav);
+
+	printf("Destroying DataStructure.\n");
+	error = destroyDataStructure(head);
+	printf("Destruction Errors = %d.\n", error);
 
 	printf("\n");
 }
@@ -318,4 +377,74 @@ char * getData(char buffer[1000], int size)
 	data[size] = '\0';
 
 	return data;
+}
+
+void displayNode(node * n)
+{
+	if(n == NULL)
+	{
+		printf("Error: No node given.\n");
+		return;
+	}
+	if(n->name == NULL || n->type == 0 || n->data == NULL)
+	{
+		printf("Error: Bad node given.\n");
+		return;
+	}
+
+	printf("type = %d, name = %s, data = %s\n", n->type, n->name, n->data);
+}
+
+int destroyNode(node * n)
+{
+	if(n == NULL)
+	{
+		printf("Error: Cannot destroy an empty node.\n");
+		return 0;
+	}
+	if(n->name != NULL)
+	{
+		free(n->name);
+	}
+	if(n->data != NULL)
+	{
+		free(n->data);
+	}
+
+	free(n);
+	return 1;
+}
+int destroyDataStructure(node * nav)
+{
+	node * temp;
+	int suc;
+	int error;
+
+	temp = NULL;
+	suc = 0;
+	error = 0;
+
+	if(nav == NULL)
+	{
+		printf("Error: Cannot destroy an empty data structure.\n");
+		return 0;
+	}
+
+	while(nav->next != NULL)
+	{
+		temp = nav;
+		nav = nav->next;
+		suc = destroyNode(temp);
+		if(suc == 0)
+		{
+			error++;
+		}
+	}
+	suc = destroyNode(nav);
+	if(suc == 0)
+	{
+		error++;
+	}
+
+	return error;
 }
