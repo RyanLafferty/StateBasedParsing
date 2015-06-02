@@ -18,6 +18,8 @@ typedef struct node
 void parseFile(char * fileName);
 node * createNode(char * name, char * data, char type);
 char getType(char buffer[1000], int size);
+char * getName(char buffer[1000], int size);
+char * getData(char buffer[1000], int size);
 
 int main(int argc, char *argv[])
 {
@@ -104,7 +106,6 @@ void parseFile(char * fileName)
 		else if(ch == ' ' && state == 1)
 		{
 			/*printf("type = %s\n", buffer);*/
-			/*get type*/
 			type = getType(buffer, size);
 			if(type == 0)
 			{
@@ -122,7 +123,19 @@ void parseFile(char * fileName)
 		else if(ch == '=')
 		{
 			/*printf("name = %s\n", buffer);*/
-			/*get name*/
+			if(type == 0)
+			{
+				printf("Error: Invalid type.\n");
+				return;
+			}
+			name = getName(buffer, size);
+			if(name == NULL)
+			{
+				printf("Error: Invalid Name.\n");
+				return;
+			}
+			/*printf("name = %s\n", name);*/
+
 			state = 3;
 			size = 0;
 			for(i = 0; i < 1000; i++)
@@ -134,6 +147,7 @@ void parseFile(char * fileName)
 		{
 			/*printf("data = %s\n", buffer);*/
 			/*get data*/
+			/*check for errors*/
 			/*add node*/
 			/*free data*/
 			state = 0;
@@ -142,6 +156,12 @@ void parseFile(char * fileName)
 			{
 				buffer[i] = 0;
 			}
+
+			free(name);
+			free(data);
+			type = 0;
+			name = NULL;
+			data = NULL;
 		}
 		else
 		{
@@ -238,4 +258,64 @@ char getType(char buffer[1000], int size)
 
 	printf("Error: Invalid type given.\n");
 	return 0;
+}
+
+char * getName(char buffer[1000], int size)
+{
+	char * name;
+	int i;
+
+	name = NULL;
+	i = 0;
+
+	if(size < 1 || buffer[0] == 0)
+	{
+		printf("Error: No name given.\n");
+		return NULL;
+	}
+
+	name = malloc(sizeof(char)*(size + 1));
+	if(name == NULL)
+	{
+		printf("Error: Out of memory.\n");
+		return NULL;
+	}
+
+	for(i = 0; i < size; i++)
+	{
+		name[i] = buffer[i];
+	}
+	name[size] = '\0';
+
+	return name;
+}
+
+char * getData(char buffer[1000], int size)
+{
+	char * data;
+	int i;
+
+	data = NULL;
+	i = 0;
+
+	if(size < 1 || buffer[0] == 0)
+	{
+		printf("Error: No data given.\n");
+		return NULL;
+	}
+
+	data = malloc(sizeof(char)*(size + 1));
+	if(data == NULL)
+	{
+		printf("Error: Out of memory.\n");
+		return NULL;
+	}
+
+	for(i = 0; i < size; i++)
+	{
+		data[i] = buffer[i];
+	}
+	data[size] = '\0';
+
+	return data;
 }
